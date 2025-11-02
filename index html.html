@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#667eea">
+<meta name="description" content="Advanced Age Calculator with live counters, fun facts, and beautiful animations">
+<title>Advanced Age Calculator</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+    :root {
+  --primary: #6366f1;
+  --secondary: #00b73d;
+  --accent: #378e99;
+  --dark: #0f172a;
+  --card-bg: rgba(15, 23, 42, 0.8);
+  --text: #f1f5f9;
+  --muted: #94a3b8;
+  --glow: #0ec3db;
+}
+
+* { 
+  margin: 0; 
+  padding: 0; 
+  box-sizing: border-box; 
+}
+
+/* Keyframe Animations */
+@keyframes gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(2deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(0.98); }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes glow {
+  0%, 100% { 
+    box-shadow: 0 0 20px rgba(129, 140, 248, 0.3),
+                0 0 40px rgba(139, 92, 246, 0.2);
+  }
+  50% { 
+    box-shadow: 0 0 30px rgba(129, 140, 248, 0.5),
+                0 0 60px rgba(139, 92, 246, 0.3);
+  }
+}
+
+@keyframes rotateGradient {
+  0% { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
+}
+
+@keyframes sparkle {
+  0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
+  50% { opacity: 1; transform: scale(1) rotate(180deg); }
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* Body Styles */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(-45deg, #667eea 0%, #764ba2 25%, #68cadc 50%, #4facfe 75%, #00f2fe 100%);
+  background-size: 400% 400%;
+  animation: gradient 15s ease infinite;
+  color: var(--text);
+  padding: 20px;
+  position: relative;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 20% 50%, rgba(139, 92, 246, 0.3) 0%, transparent 50%),
+              radial-gradient(circle at 80% 80%, rgba(236, 72, 153, 0.3) 0%, transparent 50%);
+  pointer-events: none;
+  animation: pulse 8s ease-in-out infinite;
+}
+
+.sparkle {
+  position: fixed;
+  width: 4px;
+  height: 4px;
+  background: white;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: sparkle 2s ease-in-out infinite;
+  z-index: 0;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+}
+
+/* App Container */
+.app { 
+  width: 100%; 
+  max-width: 1100px; 
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Clock Styles */
+#clock {
+  width: 220px;
+  height: 220px;
+  margin: 0 auto 16px;
+  position: relative;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95));
+  border: 5px solid rgba(129, 140, 248, 0.5);
+  box-shadow: 0 0 50px rgba(129, 140, 248, 0.5), 
+              inset 0 0 40px rgba(129, 140, 248, 0.2),
+              0 10px 30px rgba(0, 0, 0, 0.5);
+  animation: float 3s ease-in-out infinite, glow 3s ease-in-out infinite;
+}
+
+.clock-center {
+  width: 14px;
+  height: 14px;
+  background: linear-gradient(135deg, #667eea, #f093fb);
+  border-radius: 50%;
+  position: absolute;
+  top: 47%;
+  left: 46%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  box-shadow: 0 0 15px rgba(129, 140, 248, 0.9);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.hand {
+  position: absolute;
+  bottom: 50%;
+  left: 50%;
+  transform-origin: bottom center;
+  border-radius: 10px;
+  transition: transform 0.05s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.second-hand {
+  transition: none;
+}
+
+.hour-hand {
+  width: 7px;
+  height: 55px;
+  background: linear-gradient(to top, #667eea, #f093fb);
+  margin-left: -3.5px;
+  z-index: 3;
+  box-shadow: 0 0 12px rgba(129, 140, 248, 0.6);
+}
+
+.minute-hand {
+  width: 5px;
+  height: 75px;
+  background: linear-gradient(to top, #764ba2, #f093fb);
+  margin-left: -2.5px;
+  z-index: 4;
+  box-shadow: 0 0 10px rgba(129, 140, 248, 0.5);
+}
+
+.second-hand {
+  width: 3px;
+  height: 85px;
+  background: linear-gradient(to top, #f093fb, #f5576c);
+  margin-left: -1.5px;
+  z-index: 5;
+  box-shadow: 0 0 8px rgba(245, 87, 108, 0.7);
+}
+
+.clock-number {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: #f1f5f9;
+  text-shadow: 0 0 10px rgba(129, 140, 248, 0.5);
+}
+
+.clock-number span {
+  display: inline-block;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Card Styles */
+.card {
+  background: var(--card-bg);
+  border: 1px solid rgba(129, 140, 248, 0.3);
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(20px);
+  animation: slideIn 0.6s ease-out, glow 3s ease-in-out infinite;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(129, 140, 248, 0.1), transparent);
+  animation: rotateGradient 3s linear infinite;
+  pointer-events: none;
+}
+
+.card:nth-child(2) { animation-delay: 0.2s; }
+.card:nth-child(3) { animation-delay: 0.4s; }
+.card:nth-child(4) { animation-delay: 0.6s; }
+.card:nth-child(5) { animation-delay: 0.8s; }
+
+@media (hover: hover) {
+  .card:hover {
+    transform: translateY(-8px) scale(1.02);
+    border-color: rgba(129, 140, 248, 0.6);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7),
+                0 0 40px rgba(129, 140, 248, 0.4);
+  }
+}
+
+.card h1, .card h2 {
+  font-size: clamp(1.5rem, 4vw, 2.2rem);
+  background: linear-gradient(135deg, #667eea, #f093fb);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  padding-bottom: 12px;
+  margin-bottom: 24px;
+  border-bottom: 2px solid rgba(129, 140, 248, 0.3);
+  font-weight: 700;
+  position: relative;
+  animation: shimmer 3s linear infinite;
+  background-size: 200% auto;
+}
+
+/* Form Styles */
+form { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 16px;
+  position: relative;
+}
+
+form label { 
+  display: block; 
+  margin-bottom: 8px; 
+  font-weight: 600;
+  font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+  color: var(--text);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+input[type="date"], input[type="time"] {
+  width: 100%; 
+  padding: 16px 20px; 
+  border-radius: 16px; 
+  border: 2px solid rgba(129, 140, 248, 0.3);
+  background: rgba(15, 23, 42, 0.6); 
+  color: var(--text);
+  font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+  transition: all 0.3s ease;
+  color-scheme: dark;
+}
+
+input[type="date"]:focus, input[type="time"]:focus { 
+  border-color: var(--primary);
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2),
+              0 0 20px rgba(99, 102, 241, 0.3);
+  transform: translateY(-2px);
+}
+
+.button-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+/* Button Styles */
+button {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  border: none; 
+  color: #fff; 
+  cursor: pointer;
+  font-weight: 700; 
+  padding: 16px 24px;
+  border-radius: 16px;
+  font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+}
+
+button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+button:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+@media (hover: hover) {
+  button:hover { 
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(99, 102, 241, 0.6);
+  }
+}
+
+button:active { 
+  transform: translateY(-1px) scale(1.02); 
+}
+
+button#reset { 
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+}
+
+@media (hover: hover) {
+  button#reset:hover { 
+    box-shadow: 0 8px 25px rgba(239, 68, 68, 0.6);
+  }
+}
+
+/* Results Grid */
+.result-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 16px; 
+  margin-top: 24px;
+}
+
+@media (max-width: 600px) {
+  .result-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 400px) {
+  .result-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Stat Card Styles */
+.stat {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
+  border-radius: 16px;
+  padding: 20px 16px; 
+  text-align: center; 
+  color: var(--text);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border: 1px solid rgba(129, 140, 248, 0.3);
+  position: relative;
+  overflow: hidden;
+  animation: scaleIn 0.5s ease-out;
+}
+
+.stat::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s;
+}
+
+.stat:hover::before {
+  left: 100%;
+}
+
+@media (hover: hover) {
+  .stat:hover { 
+    transform: translateY(-8px) scale(1.05);
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.4), rgba(139, 92, 246, 0.4));
+    border-color: rgba(129, 140, 248, 0.6);
+    box-shadow: 0 12px 30px rgba(99, 102, 241, 0.4);
+  }
+}
+
+.stat h3 { 
+  font-size: clamp(0.75rem, 2vw, 0.9rem); 
+  color: var(--muted); 
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-weight: 600;
+}
+
+.stat .value { 
+  font-size: clamp(1.3rem, 3.5vw, 1.8rem); 
+  font-weight: 800;
+  word-break: break-word;
+  background: linear-gradient(135deg, #fff, #e0e7ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+#total-seconds, #seconds-alive, #heartbeats, #breaths, #blinks, #sleep-hours { 
+  background: linear-gradient(135deg, #f093fb, #f5576c) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* Error Message */
+.error { 
+  margin-top: 12px; 
+  font-size: clamp(0.9rem, 2.5vw, 1rem); 
+  color: #fca5a5; 
+  min-height: 1.2em;
+  text-align: center;
+  font-weight: 600;
+  animation: slideIn 0.3s ease-out, bounce 0.5s ease-in-out;
+}
+
+/* Milestone Badges */
+.milestone-badge {
+  display: inline-block;
+  padding: 8px 16px;
+  margin: 8px 4px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(236, 72, 153, 0.3));
+  border: 1px solid rgba(129, 140, 248, 0.4);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+  animation: slideIn 0.5s ease-out, bounce 0.6s ease-in-out;
+  transition: all 0.3s ease;
+}
+
+@media (hover: hover) {
+  .milestone-badge:hover {
+    transform: scale(1.1);
+    box-shadow: 0 5px 15px rgba(139, 92, 246, 0.5);
+  }
+}
+
+.milestone-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+/* Info Card */
+.info-card {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.15));
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 16px;
+  border: 1px solid rgba(129, 140, 248, 0.3);
+  animation: fadeIn 0.6s ease-out;
+}
+
+.info-card p {
+  margin: 8px 0;
+  font-size: clamp(0.9rem, 2.5vw, 1rem);
+  color: var(--text);
+  line-height: 1.6;
+  animation: slideIn 0.4s ease-out;
+  animation-fill-mode: both;
+}
+
+.info-card p:nth-child(1) { animation-delay: 0.1s; }
+.info-card p:nth-child(2) { animation-delay: 0.2s; }
+.info-card p:nth-child(3) { animation-delay: 0.3s; }
+.info-card p:nth-child(4) { animation-delay: 0.4s; }
+.info-card p:nth-child(5) { animation-delay: 0.5s; }
+.info-card p:nth-child(6) { animation-delay: 0.6s; }
+.info-card p:nth-child(7) { animation-delay: 0.7s; }
+.info-card p:nth-child(8) { animation-delay: 0.8s; }
+
+/* Footer */
+footer { 
+  margin-top: 24px; 
+  text-align: center; 
+  font-size: clamp(0.85rem, 2.5vw, 1rem);
+  line-height: 1.8;
+  padding: 0 16px;
+  animation: slideIn 1s ease-out;
+}
+
+footer span { 
+  background: linear-gradient(135deg, #667eea, #f093fb);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+}
+
+/* Calendar Picker */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover,
+input[type="time"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .card {
+    padding: 24px;
+  }
+  
+  body {
+    padding: 16px;
+  }
+  
+  #clock {
+    width: 180px;
+    height: 180px;
+  }
+  
+  .hour-hand { height: 45px; }
+  .minute-hand { height: 60px; }
+  .second-hand { height: 70px; }
+}
+
+@media (max-width: 480px) {
+  .card {
+    padding: 20px;
+  }
+  
+  #clock {
+    width: 160px;
+    height: 160px;
+  }
+  
+  .button-group {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+</head>
+<body>
+<main class="app">
+  <div id="clock">
+    <div class="clock-center"></div>
+    <div class="hand hour-hand" id="hour-hand"></div>
+    <div class="hand minute-hand" id="minute-hand"></div>
+    <div class="hand second-hand" id="second-hand"></div>
+    <div class="clock-number" style="transform: rotate(0deg);"><span style="top: 10px;">XII</span></div>
+    <div class="clock-number" style="transform: rotate(30deg);"><span style="top: 10px; transform: translateX(-50%) rotate(-30deg);">I</span></div>
+    <div class="clock-number" style="transform: rotate(60deg);"><span style="top: 10px; transform: translateX(-50%) rotate(-60deg);">II</span></div>
+    <div class="clock-number" style="transform: rotate(90deg);"><span style="top: 10px; transform: translateX(-50%) rotate(-90deg);">III</span></div>
+    <div class="clock-number" style="transform: rotate(120deg);"><span style="top: 10px; transform: translateX(-50%) rotate(-120deg);">IV</span></div>
+    <div class="clock-number" style="transform: rotate(150deg);"><span style="top: 10px; transform: translateX(-50%) rotate(-150deg);">V</span></div>
+    <div class="clock-number" style="transform: rotate(180deg);"><span style="top: 10px; transform: translateX(-50%) rotate(-180deg);">VI</span></div>
+    <div class="clock-number" style="transform: rotate(210deg);"><span style="top: 10px; transform: translateX(-50%) rotate(-210deg);">VII</span></div>
+    <div class="clock-number" style="transform: rotate(240deg);"><span style="top: 10px; transform: translateX(-50%) rotate(-240deg);">VIII</span></div>
+    <div class="clock-number" style="transform: rotate(270deg);"><span style="top: 10px; transform: translateX(-50%) rotate(-270deg);">IX</span></div>
+    <div class="clock-number" style="transform: rotate(300deg);"><span style="top: 10px; transform: translateX(-50%) rotate(-300deg);">X</span></div>
+    <div class="clock-number" style="transform: rotate(330deg);"><span style="top: 10px; transform: translateX(-50%) rotate(-330deg);">XI</span></div>
+  </div>
+  
+  <section class="card">
+    <h1>✨ Advanced Age Calculator</h1>
+    <form id="age-form">
+      <div>
+        <label for="dob">🎂 Enter your date of birth:</label>
+        <input type="date" id="dob" required>
+      </div>
+      <div>
+        <label for="tob">🕐 Enter your time of birth (optional):</label>
+        <input type="time" id="tob">
+      </div>
+      <div class="button-group">
+        <button type="submit">Calculate Age</button>
+        <button type="button" id="reset">Reset</button>
+      </div>
+      <div id="error" class="error"></div>
+    </form>
+    
+    <div id="results" class="result-grid">
+      <div class="stat"><h3>Years</h3><div class="value" id="years">—</div></div>
+      <div class="stat"><h3>Months</h3><div class="value" id="months">—</div></div>
+      <div class="stat"><h3>Days</h3><div class="value" id="days">—</div></div>
+      <div class="stat"><h3>Hours</h3><div class="value" id="hours">—</div></div>
+      <div class="stat"><h3>Total Days</h3><div class="value" id="total-days">—</div></div>
+      <div class="stat"><h3>Total Weeks</h3><div class="value" id="total-weeks">—</div></div>
+      <div class="stat"><h3>Total Months</h3><div class="value" id="total-months">—</div></div>
+      <div class="stat"><h3>Total Seconds</h3><div class="value" id="total-seconds">—</div></div>
+      <div class="stat"><h3>Next Birthday</h3><div class="value" id="next-birthday">—</div></div>
+      <div class="stat"><h3>Birthday Weekday</h3><div class="value" id="weekday">—</div></div>
+      <div class="stat"><h3>Zodiac Sign</h3><div class="value" id="zodiac">—</div></div>
+      <div class="stat"><h3>Chinese Zodiac</h3><div class="value" id="chinese-zodiac">—</div></div>
+      <div class="stat"><h3>💓 Heartbeats</h3><div class="value" id="heartbeats">—</div></div>
+      <div class="stat"><h3>🫁 Breaths</h3><div class="value" id="breaths">—</div></div>
+      <div class="stat"><h3>👁️ Blinks</h3><div class="value" id="blinks">—</div></div>
+      <div class="stat"><h3>😴 Sleep Hours</h3><div class="value" id="sleep-hours">—</div></div>
+    </div>
+    
+    <div id="milestones" class="milestone-container"></div>
+  </section>
+  
+  <section class="card">
+    <h2>⏱️ Live Counter</h2>
+    <div class="result-grid">
+      <div class="stat"><h3>Seconds Alive</h3><div class="value" id="seconds-alive">—</div></div>
+      <div class="stat"><h3>Minutes Alive</h3><div class="value" id="minutes-alive">—</div></div>
+      <div class="stat"><h3>Hours Alive</h3><div class="value" id="hours-alive">—</div></div>
+      <div class="stat"><h3>Birthday Countdown</h3><div class="value" id="countdown">—</div></div>
+    </div>
+  </section>
+  
+  <section class="card">
+    <h2>📊 Fun Facts About Your Age</h2>
+    <div class="info-card" id="fun-facts">
+      <p>🎯 Enter your birth date to discover amazing facts about your life!</p>
+    </div>
+  </section>
+  
+  <section class="card">
+    <h2>🌟 More Fascinating Stats</h2>
+    <div class="info-card" id="extra-facts">
+      <p>✨ Calculate your age to unlock more incredible statistics!</p>
+    </div>
+  </section>
+  
+  <footer>
+    ⏳ Time is the most precious gift. Make every second count. ✨<br>
+    Created with 💜 by <span>JUNAID MAROOF MEMON</span>
+  </footer>
+</main>
+
+<script src="script.js"></script>
+<script>
+    // DOM Elements
+const form = document.getElementById('age-form');
+const resetBtn = document.getElementById('reset');
+const dobInput = document.getElementById('dob');
+const tobInput = document.getElementById('tob');
+const errorEl = document.getElementById('error');
+const yearsEl = document.getElementById('years');
+const monthsEl = document.getElementById('months');
+const daysEl = document.getElementById('days');
+const hoursEl = document.getElementById('hours');
+const totalDaysEl = document.getElementById('total-days');
+const totalWeeksEl = document.getElementById('total-weeks');
+const totalMonthsEl = document.getElementById('total-months');
+const totalSecondsEl = document.getElementById('total-seconds');
+const nextBdayEl = document.getElementById('next-birthday');
+const weekdayEl = document.getElementById('weekday');
+const zodiacEl = document.getElementById('zodiac');
+const chineseZodiacEl = document.getElementById('chinese-zodiac');
+const hourHand = document.getElementById('hour-hand');
+const minuteHand = document.getElementById('minute-hand');
+const secondHand = document.getElementById('second-hand');
+const secondsAliveEl = document.getElementById('seconds-alive');
+const minutesAliveEl = document.getElementById('minutes-alive');
+const hoursAliveEl = document.getElementById('hours-alive');
+const countdownEl = document.getElementById('countdown');
+const heartbeatsEl = document.getElementById('heartbeats');
+const breathsEl = document.getElementById('breaths');
+const blinksEl = document.getElementById('blinks');
+const sleepHoursEl = document.getElementById('sleep-hours');
+const milestonesEl = document.getElementById('milestones');
+const funFactsEl = document.getElementById('fun-facts');
+const extraFactsEl = document.getElementById('extra-facts');
+
+let birthDate = null;
+let secondsInterval = null;
+let countdownInterval = null;
+
+// Utility Functions
+function pad2(n) { 
+  return String(n).padStart(2, '0'); 
+}
+
+function daysInMonth(year, monthIndex) {
+  return new Date(year, monthIndex + 1, 0).getDate();
+}
+
+function parseInputDate(value) {
+  if (!value) return null;
+  const parts = value.split('-');
+  const y = parseInt(parts[0], 10);
+  const m = parseInt(parts[1], 10);
+  const d = parseInt(parts[2], 10);
+  if (isNaN(y) || isNaN(m) || isNaN(d)) return null;
+  return new Date(y, m - 1, d);
+}
+
+function setMaxForDateInput() {
+  const now = new Date();
+  const max = now.getFullYear() + '-' + pad2(now.getMonth() + 1) + '-' + pad2(now.getDate());
+  dobInput.setAttribute('max', max);
+}
+
+function animateValue(el, start, end, duration) {
+  duration = duration || 800;
+  if (start === end) { 
+    el.textContent = end.toLocaleString(); 
+    return; 
+  }
+  const range = end - start; 
+  let startTime = null;
+  
+  function step(timestamp) {
+    if (!startTime) startTime = timestamp;
+    const progress = Math.min((timestamp - startTime) / duration, 1);
+    const easeProgress = 1 - Math.pow(1 - progress, 4);
+    const value = Math.floor(start + range * easeProgress);
+    el.textContent = value.toLocaleString();
+    if (progress < 1) {
+      requestAnimationFrame(step);
+    }
+  }
+  requestAnimationFrame(step);
+}
+
+function setPlaceholders() {
+  const elements = [
+    yearsEl, monthsEl, daysEl, hoursEl, totalDaysEl, totalWeeksEl, totalMonthsEl,
+    totalSecondsEl, nextBdayEl, weekdayEl, zodiacEl, chineseZodiacEl, secondsAliveEl, 
+    minutesAliveEl, hoursAliveEl, countdownEl, heartbeatsEl, breathsEl, blinksEl, sleepHoursEl
+  ];
+  
+  elements.forEach(function(el) {
+    el.textContent = '—';
+  });
+  
+  milestonesEl.innerHTML = '';
+  funFactsEl.innerHTML = '<p>🎯 Enter your birth date to discover amazing facts about your life!</p>';
+  extraFactsEl.innerHTML = '<p>✨ Calculate your age to unlock more incredible statistics!</p>';
+  
+  if (secondsInterval) {
+    clearInterval(secondsInterval);
+    secondsInterval = null;
+  }
+  if (countdownInterval) {
+    clearInterval(countdownInterval);
+    countdownInterval = null;
+  }
+}
+
+function isLeapYear(year) {
+  return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+}
+
+function getZodiac(month, day) {
+  if ((month === 0 && day >= 20) || (month === 1 && day <= 18)) return "♒ Aquarius";
+  if ((month === 1 && day >= 19) || (month === 2 && day <= 20)) return "♓ Pisces";
+  if ((month === 2 && day >= 21) || (month === 3 && day <= 19)) return "♈ Aries";
+  if ((month === 3 && day >= 20) || (month === 4 && day <= 20)) return "♉ Taurus";
+  if ((month === 4 && day >= 21) || (month === 5 && day <= 20)) return "♊ Gemini";
+  if ((month === 5 && day >= 21) || (month === 6 && day <= 22)) return "♋ Cancer";
+  if ((month === 6 && day >= 23) || (month === 7 && day <= 22)) return "♌ Leo";
+  if ((month === 7 && day >= 23) || (month === 8 && day <= 22)) return "♍ Virgo";
+  if ((month === 8 && day >= 23) || (month === 9 && day <= 22)) return "♎ Libra";
+  if ((month === 9 && day >= 23) || (month === 10 && day <= 21)) return "♏ Scorpio";
+  if ((month === 10 && day >= 22) || (month === 11 && day <= 21)) return "♐ Sagittarius";
+  return "♑ Capricorn";
+}
+
+function getChineseZodiac(year) {
+  const animals = [
+    "🐀 Rat", "🐂 Ox", "🐅 Tiger", "🐇 Rabbit", "🐉 Dragon", "🐍 Snake",
+    "🐎 Horse", "🐐 Goat", "🐒 Monkey", "🐓 Rooster", "🐕 Dog", "🐖 Pig"
+  ];
+  return animals[(year - 4) % 12];
+}
+
+function calculateAgeParts(birth, now) {
+  let years = now.getFullYear() - birth.getFullYear();
+  let months = now.getMonth() - birth.getMonth();
+  let days = now.getDate() - birth.getDate();
+  let hours = now.getHours() - birth.getHours();
+
+  if (hours < 0) {
+    hours += 24;
+    days--;
+  }
+  if (days < 0) {
+    const prevMonthIndex = (now.getMonth() - 1 + 12) % 12;
+    const prevMonthYear = prevMonthIndex === 11 ? now.getFullYear() - 1 : now.getFullYear();
+    days += daysInMonth(prevMonthYear, prevMonthIndex);
+    months--;
+  }
+  if (months < 0) {
+    years--;
+    months += 12;
+  }
+  return { years: years, months: months, days: days, hours: hours };
+}
+
+function getMilestones(totalDays, totalSeconds) {
+  const milestones = [];
+  
+  // Day milestones
+  if (totalDays === 100) milestones.push("🎈 100 Days Old!");
+  if (totalDays === 365) milestones.push("🎂 1 Year Old!");
+  if (totalDays === 1000) milestones.push("🎉 1,000 Days Old!");
+  if (totalDays === 2000) milestones.push("🌟 2,000 Days Old!");
+  if (totalDays === 3650) milestones.push("🎊 10 Years Old!");
+  if (totalDays === 5000) milestones.push("🌟 5,000 Days Old!");
+  if (totalDays === 7300) milestones.push("✨ 20 Years Old!");
+  if (totalDays === 10000) milestones.push("🎊 10,000 Days Old!");
+  if (totalDays === 18250) milestones.push("🎓 50 Years Old!");
+  
+  // Age milestones
+  const age = totalDays / 365.25;
+  if (Math.abs(age - 13) < 0.01) milestones.push("🎮 Teenager!");
+  if (Math.abs(age - 16) < 0.01) milestones.push("🚗 Sweet 16!");
+  if (Math.abs(age - 18) < 0.01) milestones.push("🎓 Legal Adult!");
+  if (Math.abs(age - 21) < 0.01) milestones.push("🍾 21 Years Old!");
+  if (Math.abs(age - 25) < 0.01) milestones.push("✨ Quarter Century!");
+  if (Math.abs(age - 30) < 0.01) milestones.push("🎯 30 and Thriving!");
+  if (Math.abs(age - 40) < 0.01) milestones.push("💎 Fabulous 40!");
+  if (Math.abs(age - 50) < 0.01) milestones.push("🎂 Half Century!");
+  if (Math.abs(age - 60) < 0.01) milestones.push("👑 Diamond Jubilee!");
+  if (Math.abs(age - 75) < 0.01) milestones.push("🌟 Platinum Anniversary!");
+  
+  // Second milestones
+  const million = 1000000;
+  const billion = 1000000000;
+  if (Math.abs(totalSeconds - million) < 100) milestones.push("⚡ 1 Million Seconds!");
+  if (Math.abs(totalSeconds - billion) < 100) milestones.push("⚡ 1 Billion Seconds!");
+  if (Math.abs(totalSeconds - million * 100) < 1000) milestones.push("🚀 100 Million Seconds!");
+  if (Math.abs(totalSeconds - million * 500) < 5000) milestones.push("🌠 500 Million Seconds!");
+  
+  return milestones;
+}
+
+function getFunFacts(ageParts, totalDays, totalSeconds) {
+  const facts = [];
+  
+  // Earth and Space Facts
+  const earthYears = (totalDays / 365.25).toFixed(2);
+  facts.push(`🌍 You've lived approximately ${earthYears} Earth years`);
+  
+  const earthRotations = totalDays;
+  facts.push(`🌎 Earth has rotated ${earthRotations.toLocaleString()} times since your birth`);
+  
+  const moonCycles = Math.floor(totalDays / 29.53);
+  facts.push(`🌙 You've experienced about ${moonCycles.toLocaleString()} full moon cycles`);
+  
+  const sunrises = totalDays;
+  facts.push(`☀️ You've seen approximately ${sunrises.toLocaleString()} sunrises and sunsets`);
+  
+  const earthOrbits = (totalDays / 365.25).toFixed(1);
+  facts.push(`🪐 Earth has orbited the sun ${earthOrbits} times during your lifetime`);
+  
+  // Body Functions
+  const heartbeats = Math.floor(totalSeconds * 70 / 60);
+  facts.push(`💓 Your heart has beaten approximately ${heartbeats.toLocaleString()} times`);
+  
+  const breaths = Math.floor(totalSeconds * 16 / 60);
+  facts.push(`🫁 You've taken roughly ${breaths.toLocaleString()} breaths`);
+  
+  const blinks = Math.floor(totalSeconds * 17 / 60);
+  facts.push(`👁️ You've blinked about ${blinks.toLocaleString()} times`);
+  
+  // Daily Activities
+  const meals = totalDays * 3;
+  facts.push(`🍽️ You've had approximately ${meals.toLocaleString()} meals`);
+  
+  const pizzas = Math.floor(totalDays / 7);
+  facts.push(`🍕 If you ate pizza once a week, you've had about ${pizzas.toLocaleString()} pizzas!`);
+  
+  const waterGlasses = totalDays * 8;
+  facts.push(`💧 You should have drunk about ${waterGlasses.toLocaleString()} glasses of water`);
+  
+  const coffees = Math.floor(totalDays * 1.5);
+  facts.push(`☕ If you drink coffee daily, you've had roughly ${coffees.toLocaleString()} cups`);
+  
+  return facts;
+}
+
+function getExtraFacts(ageParts, totalDays, totalSeconds) {
+  const facts = [];
+  
+  // Sleep and Dreams
+  const sleepHours = Math.floor(totalSeconds / 3600 * 0.33);
+  facts.push(`😴 You've slept approximately ${sleepHours.toLocaleString()} hours (about ${Math.floor(sleepHours / 24).toLocaleString()} days)`);
+  
+  const dreams = Math.floor(totalDays * 4);
+  facts.push(`💭 You've had roughly ${dreams.toLocaleString()} dreams (assuming 4-5 per night)`);
+  
+  // Mental Activity
+  const thoughts = Math.floor(totalSeconds * 50 / 60);
+  facts.push(`🧠 You've thought approximately ${thoughts.toLocaleString()} thoughts (50 per minute)`);
+  
+  const decisions = totalDays * 35000;
+  facts.push(`🤔 You've made around ${decisions.toLocaleString()} decisions (35,000 per day)`);
+  
+  const memories = Math.floor(totalDays * 100);
+  facts.push(`📚 You've created approximately ${memories.toLocaleString()} memorable moments`);
+  
+  // Social Interactions
+  const smiles = totalDays * 20;
+  facts.push(`😊 You've smiled roughly ${smiles.toLocaleString()} times (20 per day)`);
+  
+  const laughs = totalDays * 15;
+  facts.push(`😂 You've laughed about ${laughs.toLocaleString()} times (15 per day)`);
+  
+  const words = Math.floor(totalDays * 16000);
+  facts.push(`💬 You've spoken approximately ${words.toLocaleString()} words (16,000 per day)`);
+  
+  // Physical Activity
+  const steps = Math.floor(totalDays * 7500);
+  facts.push(`🚶 You've taken about ${steps.toLocaleString()} steps (7,500 per day average)`);
+  
+  const miles = Math.floor(steps * 0.0004);
+  facts.push(`🏃 That's approximately ${miles.toLocaleString()} miles walked!`);
+  
+  // Hair and Nails
+  const hairGrowth = Math.floor(totalDays * 0.44);
+  facts.push(`💇 Your hair has grown about ${hairGrowth.toLocaleString()} mm (${(hairGrowth / 25.4).toFixed(1)} inches)`);
+  
+  const nailGrowth = Math.floor(totalDays * 0.1);
+  facts.push(`💅 Your fingernails have grown approximately ${nailGrowth.toLocaleString()} mm`);
+  
+  // Technology Usage
+  const internetHours = Math.floor(totalDays * 6.5);
+  facts.push(`📱 You've spent roughly ${internetHours.toLocaleString()} hours online (6.5 hrs/day)`);
+  
+  const screenTime = Math.floor(totalDays * 7);
+  facts.push(`📺 About ${screenTime.toLocaleString()} hours of screen time total`);
+  
+  // Books and Learning
+  const booksRead = Math.floor(totalDays * 365.25 * ageParts.years / 12);
+  facts.push(`📖 You could have read approximately ${booksRead.toLocaleString()} books`);
+  
+  return facts;
+}
+
+function displayMilestones(milestones) {
+  if (milestones.length > 0) {
+    milestonesEl.innerHTML = milestones.map(m => 
+      '<div class="milestone-badge">' + m + '</div>'
+    ).join('');
+  } else {
+    milestonesEl.innerHTML = '';
+  }
+}
+
+function displayFunFacts(facts) {
+  funFactsEl.innerHTML = facts.map((fact, index) => {
+    return '<p style="animation-delay: ' + (index * 0.1) + 's">' + fact + '</p>';
+  }).join('');
+}
+
+function displayExtraFacts(facts) {
+  extraFactsEl.innerHTML = facts.map((fact, index) => {
+    return '<p style="animation-delay: ' + (index * 0.1) + 's">' + fact + '</p>';
+  }).join('');
+}
+
+function compute(birth) {
+  const now = new Date();
+  if (!birth || birth > now) { 
+    setPlaceholders(); 
+    return; 
+  }
+
+  const ageParts = calculateAgeParts(birth, now);
+  animateValue(yearsEl, 0, ageParts.years);
+  animateValue(monthsEl, 0, ageParts.months);
+  animateValue(daysEl, 0, ageParts.days);
+  animateValue(hoursEl, 0, ageParts.hours);
+
+  const totalDays = Math.floor((now - birth) / 86400000);
+  animateValue(totalDaysEl, 0, totalDays);
+  animateValue(totalWeeksEl, 0, Math.floor(totalDays / 7));
+  
+  const totalMonths = ageParts.years * 12 + ageParts.months;
+  animateValue(totalMonthsEl, 0, totalMonths);
+
+  if (secondsInterval) clearInterval(secondsInterval);
+  
+  function updateSeconds() {
+    const currentNow = new Date();
+    const seconds = Math.floor((currentNow - birth) / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(seconds / 3600);
+    
+    totalSecondsEl.textContent = seconds.toLocaleString();
+    secondsAliveEl.textContent = seconds.toLocaleString();
+    minutesAliveEl.textContent = minutes.toLocaleString();
+    hoursAliveEl.textContent = hours.toLocaleString();
+    
+    const heartbeats = Math.floor(seconds * 70 / 60);
+    heartbeatsEl.textContent = heartbeats.toLocaleString();
+    
+    const breaths = Math.floor(seconds * 16 / 60);
+    breathsEl.textContent = breaths.toLocaleString();
+    
+    const blinks = Math.floor(seconds * 17 / 60);
+    blinksEl.textContent = blinks.toLocaleString();
+    
+    const sleepHours = Math.floor(hours * 0.33);
+    sleepHoursEl.textContent = sleepHours.toLocaleString();
+  }
+  
+  updateSeconds();
+  secondsInterval = setInterval(updateSeconds, 1000);
+
+  let next = new Date(now.getFullYear(), birth.getMonth(), birth.getDate());
+  if (birth.getMonth() === 1 && birth.getDate() === 29 && !isLeapYear(next.getFullYear())) {
+    next = new Date(next.getFullYear(), 1, 28);
+  }
+  if (next <= now) {
+    next.setFullYear(next.getFullYear() + 1);
+    if (birth.getMonth() === 1 && birth.getDate() === 29 && !isLeapYear(next.getFullYear())) {
+      next = new Date(next.getFullYear(), 1, 28);
+    }
+  }
+
+  if (countdownInterval) clearInterval(countdownInterval);
+  
+  function updateCountdown() {
+    const currentNow = new Date();
+    const diff = next - currentNow;
+    if (diff <= 0) {
+      countdownEl.textContent = "🎉 Happy Birthday!";
+      nextBdayEl.textContent = "🎂 Today!";
+      return;
+    }
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    nextBdayEl.textContent = d === 0 ? "🎂 Today" : d + " day" + (d > 1 ? "s" : "");
+    countdownEl.textContent = d + 'd ' + h + 'h ' + m + 'm ' + s + 's';
+  }
+  
+  updateCountdown();
+  countdownInterval = setInterval(updateCountdown, 1000);
+
+  weekdayEl.textContent = birth.toLocaleDateString(undefined, { weekday: 'long' });
+  zodiacEl.textContent = getZodiac(birth.getMonth(), birth.getDate());
+  chineseZodiacEl.textContent = getChineseZodiac(birth.getFullYear());
+  
+  const totalSeconds = Math.floor((now - birth) / 1000);
+  const milestones = getMilestones(totalDays, totalSeconds);
+  displayMilestones(milestones);
+  
+  const funFacts = getFunFacts(ageParts, totalDays, totalSeconds);
+  displayFunFacts(funFacts);
+  
+  const extraFacts = getExtraFacts(ageParts, totalDays, totalSeconds);
+  displayExtraFacts(extraFacts);
+}
+
+// Event Listeners
+form.addEventListener('submit', function(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  
+  errorEl.textContent = '';
+  
+  if (!dobInput.value) {
+    errorEl.textContent = '⚠️ Please select a date of birth.';
+    setPlaceholders();
+    return;
+  }
+  
+  let birth = parseInputDate(dobInput.value);
+  const now = new Date();
+
+  if (!birth) {
+    errorEl.textContent = '⚠️ Please select a valid date.';
+    setPlaceholders();
+    return;
+  }
+  if (birth > now) {
+    errorEl.textContent = '⚠️ Date of birth cannot be in the future.';
+    setPlaceholders();
+    return;
+  }
+  
+  if (tobInput.value) {
+    const timeParts = tobInput.value.split(':');
+    const hours = parseInt(timeParts[0], 10);
+    const minutes = parseInt(timeParts[1], 10);
+    if (!isNaN(hours) && !isNaN(minutes)) {
+      birth.setHours(hours, minutes, 0, 0);
+    }
+  } else {
+    birth.setHours(0, 0, 0, 0);
+  }
+  
+  birthDate = birth;
+  compute(birthDate);
+}, false);
+
+resetBtn.addEventListener('click', function() {
+  dobInput.value = '';
+  tobInput.value = '';
+  errorEl.textContent = '';
+  setPlaceholders();
+  birthDate = null;
+});
+
+// Clock Functions
+function updateClock() {
+  const now = new Date();
+  const hours = now.getHours() % 12;
+  const minutes = now.getMinutes();
+  const seconds = now.getSeconds();
+  const milliseconds = now.getMilliseconds();
+  
+  const secondDeg = (seconds + milliseconds / 1000) * 6;
+  const minuteDeg = (minutes + seconds / 60) * 6;
+  const hourDeg = (hours + minutes / 60) * 30;
+  
+  secondHand.style.transform = 'rotate(' + secondDeg + 'deg)';
+  minuteHand.style.transform = 'rotate(' + minuteDeg + 'deg)';
+  hourHand.style.transform = 'rotate(' + hourDeg + 'deg)';
+}
+
+// Sparkle Effects
+function createSparkle() {
+  const sparkle = document.createElement('div');
+  sparkle.className = 'sparkle';
+  sparkle.style.left = Math.random() * 100 + '%';
+  sparkle.style.top = Math.random() * 100 + '%';
+  sparkle.style.animationDelay = Math.random() * 2 + 's';
+  document.body.appendChild(sparkle);
+  
+  setTimeout(function() {
+    sparkle.remove();
+  }, 4000);
+}
+
+// Initialize
+setPlaceholders();
+setMaxForDateInput();
+updateClock();
+setInterval(updateClock, 50);
+
+// Create initial sparkles
+for (let i = 0; i < 20; i++) {
+  setTimeout(createSparkle, i * 200);
+}
+
+setInterval(createSparkle, 3000);
+</script>
+</body>
+</html>
